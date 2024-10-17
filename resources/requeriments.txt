@@ -1,0 +1,6 @@
+matplotlib
+tk
+tkcalendar
+pandas 
+reportlab 
+fpdf
