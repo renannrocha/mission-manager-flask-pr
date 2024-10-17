@@ -1,17 +1,61 @@
 import sqlite3
-from sqlite3 import Error
 
-class Database:
-    def __init__(self, db_name="expedicoes_espaciais.db"):
-        try:
-            self.conn = sqlite3.connect(db_name)
-            self.create_table()
-        except Error as e:
-            print(f"Erro ao conectar ao banco de dados: {e}")
-    
-    def create_table(self):
-        try:
-            query = """
+DB_NAME = "expedicoes_espaciais.db"
+
+def get_db_connection():
+    """Obtém uma conexão com o banco de dados."""
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        return conn
+    except sqlite3.Error as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
+        return None
+
+def execute_query(query, params=()):
+    """Executa uma query no banco de dados."""
+    conn = get_db_connection()
+    if conn is None:
+        print("Conexão não estabelecida. Query não executada.")
+        return
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Erro ao executar a query: {e}")
+    finally:
+        conn.close()
+
+def search_query(query, params=()):
+    """Busca dados no banco de dados e retorna os resultados."""
+    conn = get_db_connection()
+    if conn is None:
+        print("Conexão não estabelecida. Busca não realizada.")
+        return []
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        resultados = cursor.fetchall()
+        return resultados
+    except sqlite3.Error as e:
+        print(f"Erro ao buscar dados: {e}")
+        return []
+    finally:
+        conn.close()
+
+def init_db():
+    """Inicializa o banco de dados criando as tabelas necessárias."""
+    conn = get_db_connection()
+    if conn is None:
+        print("Conexão não estabelecida. Banco de dados não inicializado.")
+        return
+
+    try:
+        cursor = conn.cursor()
+        
+        cursor.execute('''
             CREATE TABLE IF NOT EXISTS missao (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome TEXT NOT NULL,
@@ -24,53 +68,56 @@ class Database:
                 custo REAL,
                 status TEXT
             )
-            """
-            self.conn.execute(query)
-            self.conn.commit()
-        except Error as e:
-            print(f"Erro ao criar a tabela: {e}")
+        ''')
 
-    def add_missao(self, missao):
-        try:
-            query = """
-            INSERT INTO missao (nome, data_lancamento, destino, estado_missao, tripulacao, carga_util, duracao, custo, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            self.conn.execute(query, missao)
-            self.conn.commit()
-        except Error as e:
-            print(f"Erro ao adicionar missão: {e}")
+        conn.commit()
+        print("Banco de dados e tabela 'missao' criados com sucesso.")
+    except sqlite3.Error as e:
+        print(f"Erro ao inicializar o banco de dados: {e}")
+    finally:
+        conn.close()
 
-    def get_missoes(self):
-        try:
-            cursor = self.conn.execute("SELECT * FROM missao")
-            return cursor.fetchall()
-        except Error as e:
-            print(f"Erro ao recuperar missões: {e}")
-            return []
+# Funções CRUD específicas para o sistema de expedições
 
-    def get_missao_by_id(self, missao_id):
-        try:
-            cursor = self.conn.execute("SELECT * FROM missao WHERE id = ?", (missao_id,))
-            return cursor.fetchone()
-        except Error as e:
-            print(f"Erro ao recuperar missão pelo ID {missao_id}: {e}")
-            return None
+def adicionar_missao(nome, data_lancamento, destino, estado_missao, tripulacao, carga_util, duracao, custo, status):
+    """Adiciona uma nova missão ao banco de dados."""
+    query = '''
+        INSERT INTO missao (nome, data_lancamento, destino, estado_missao, tripulacao, carga_util, duracao, custo, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    '''
+    execute_query(query, (nome, data_lancamento, destino, estado_missao, tripulacao, carga_util, duracao, custo, status))
 
-    def update_missao(self, missao_id, updated_data):
-        try:
-            query = """
-            UPDATE missao SET nome = ?, data_lancamento = ?, destino = ?, estado_missao = ?, tripulacao = ?, carga_util = ?, duracao = ?, custo = ?, status = ?
-            WHERE id = ?
-            """
-            self.conn.execute(query, (*updated_data, missao_id))
-            self.conn.commit()
-        except Error as e:
-            print(f"Erro ao atualizar missão com ID {missao_id}: {e}")
+def atualizar_missao(missao_id, nome, data_lancamento, destino, estado_missao, tripulacao, carga_util, duracao, custo, status):
+    """Atualiza os dados de uma missão existente."""
+    query = '''
+        UPDATE missao
+        SET nome = ?, data_lancamento = ?, destino = ?, estado_missao = ?, tripulacao = ?, carga_util = ?, duracao = ?, custo = ?, status = ?
+        WHERE id = ?
+    '''
+    execute_query(query, (nome, data_lancamento, destino, estado_missao, tripulacao, carga_util, duracao, custo, status, missao_id))
 
-    def delete_missao(self, missao_id):
-        try:
-            self.conn.execute("DELETE FROM missao WHERE id = ?", (missao_id,))
-            self.conn.commit()
-        except Error as e:
-            print(f"Erro ao excluir missão com ID {missao_id}: {e}")
+def excluir_missao(missao_id):
+    """Exclui uma missão do banco de dados."""
+    query = "DELETE FROM missao WHERE id = ?"
+    execute_query(query, (missao_id,))
+
+def listar_missoes():
+    """Retorna uma lista de todas as missões registradas no banco de dados."""
+    query = "SELECT * FROM missao"
+    return search_query(query)
+
+def buscar_missao_por_id(missao_id):
+    """Busca os detalhes de uma missão pelo ID."""
+    query = "SELECT * FROM missao WHERE id = ?"
+    return search_query(query, (missao_id,))
+
+def buscar_missoes_por_data(data_inicio, data_fim):
+    """Busca missões lançadas dentro de um intervalo de datas."""
+    query = '''
+        SELECT * FROM missao
+        WHERE data_lancamento BETWEEN ? AND ?
+    '''
+    return search_query(query, (data_inicio, data_fim))
+
+if __name__ == "__main__":
+    init_db()

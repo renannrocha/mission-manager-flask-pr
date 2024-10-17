@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from mission_form import MissionForm
+from gui.mission_form import MissionForm
 from database.database import Database
 
 class MissionList(tk.Frame):
