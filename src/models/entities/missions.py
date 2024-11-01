@@ -1,69 +1,90 @@
 from src.database import db
 from src.models.enum.missionStatus import MissionStatus
 from decimal import Decimal
+from datetime import datetime
 
 class Missions(db.Model):
 
     __tablename__ = 'missions'
     __table_args__ = {'sqlite_autoincrement': True}
 
+    """
+    {
+        "name": "Apollo 11",
+        "launch_date": "1969-07-16",
+        "destination": "Moon",
+        "status": "Completed",
+        "crew": "Neil Armstrong, Buzz Aldrin",
+        "payload": "Lunar Module",
+        "duration": "8 days",
+        "cost": 1000000.0,
+        "mission_status": "Successful"
+    }
+    """
+
     id = db.Column(db.Integer, primary_key=True)
-    missionName = db.Column(db.String(255))
-    releaseDate = db.Column(db.Date)
+    name = db.Column(db.String(255))
+    launchDate = db.Column(db.Date)
     destination = db.Column(db.String(255))
     missionStatus = db.Column(db.Enum(MissionStatus))
-    tripulation = db.Column(db.String(255))
+    crew = db.Column(db.String(255))
     payload = db.Column(db.String(255))
-    missionDuration = db.Column(db.Date)
-    missionCost = db.Column(db.Numeric(10, 2))  
-    missionInfoStatus = db.Column(db.String(255))
+    duration = db.Column(db.String(255))
+    cost = db.Column(db.Numeric(10, 2))  
+    missionInfo = db.Column(db.String(500))
 
-    def __init__(self, missionName, releaseDate, destination, missionStatus, tripulation, payload, missionDuration, missionCost, missionInfoStatus):
-        self.missionName = missionName
-        self.releaseDate = releaseDate
+    def __init__(self, name, launchDate, destination, missionStatus, crew, payload, duration, cost, missionInfo):
+        self.name = name
+        self.launchDate = launchDate
         self.destination = destination
         self.missionStatus = missionStatus
-        self.tripulation = tripulation
+        self.crew = crew
         self.payload = payload
-        self.missionDuration = missionDuration
-        self.missionCost = missionCost  
-        self.missionInfoStatus = missionInfoStatus
+        self.duration = duration
+        self.cost = cost  
+        self.missionInfo = missionInfo
 
     @classmethod
-    def create_mission(cls, missionName, releaseDate, destination, missionStatus, tripulation, payload, missionDuration, missionCost, missionInfoStatus):
+    def create_mission(cls, name, launchDate, destination, missionStatus, crew, payload, duration, cost, missionInfo):
         try:
+            # Converte a string de data para um objeto `date`
+            launchDate = datetime.strptime(launchDate, '%Y-%m-%d').date()
+            
+            # Cria a nova missão com o formato correto dos dados
             new_mission = cls(
-                missionName,
-                releaseDate,
-                destination,
-                missionStatus,
-                tripulation,
-                payload,
-                missionDuration,
-                missionCost,  
-                missionInfoStatus
+                name=name,
+                launchDate=launchDate,
+                destination=destination,
+                missionStatus=missionStatus,
+                crew=crew,
+                payload=payload,
+                duration=duration,
+                cost=Decimal(cost),  # Converte o custo para Decimal, caso necessário
+                missionInfo=missionInfo
             )
             db.session.add(new_mission)
             db.session.commit()
             return new_mission
         except Exception as e:
             print("Erro ao criar missão:", e)
+            db.session.rollback()  # Reverte transações em caso de erro
+            return None  # Retorna None explicitamente em caso de falha
 
     @classmethod
     def get_missions(cls):
         try:
-            missions = db.session.query(cls).order_by(cls.releaseDate.desc()).all()
+            missions = db.session.query(cls).order_by(cls.launchDate.desc()).all()
             return [{
                 'id': mission.id,
-                'missionName': mission.missionName,
-                'releaseDate': mission.releaseDate,
+                'name': mission.name,
+                'launchDate': mission.launchDate,
                 'destination': mission.destination,
                 'missionStatus': mission.missionStatus.name,
-                'tripulation': mission.tripulation,
+                'crew': mission.crew,
                 'payload': mission.payload,
-                'missionDuration': mission.missionDuration,
-                'missionCost': str(mission.missionCost), 
-                'missionInfoStatus': mission.missionInfoStatus
+                'duration': mission.duration,
+                'cost': str(mission.cost), 
+                'missionInfo': mission.missionInfo
             } for mission in missions]
         except Exception as e:
             print("Erro ao obter missões:", e)
@@ -75,15 +96,15 @@ class Missions(db.Model):
             if mission:
                 return {
                     'id': mission.id,
-                    'missionName': mission.missionName,
-                    'releaseDate': mission.releaseDate,
+                    'name': mission.name,
+                    'launchDate': mission.launchDate,
                     'destination': mission.destination,
                     'missionStatus': mission.missionStatus.name,
-                    'tripulation': mission.tripulation,
+                    'crew': mission.crew,
                     'payload': mission.payload,
-                    'missionDuration': mission.missionDuration,
-                    'missionCost': str(mission.missionCost),  
-                    'missionInfoStatus': mission.missionInfoStatus
+                    'duration': mission.duration,
+                    'cost': str(mission.cost),  
+                    'missionInfo': mission.missionInfo
                 }
             return None
         except Exception as e:
@@ -92,47 +113,47 @@ class Missions(db.Model):
     @classmethod
     def search_missions_by_date(cls, start_date, end_date):
         try:
-            missions = db.session.query(cls).filter(cls.releaseDate.between(start_date, end_date)).all()
+            missions = db.session.query(cls).filter(cls.launchDate.between(start_date, end_date)).all()
             return [{
                 'id': mission.id,
-                'missionName': mission.missionName,
-                'releaseDate': mission.releaseDate,
+                'name': mission.name,
+                'launchDate': mission.launchDate,
                 'destination': mission.destination,
                 'missionStatus': mission.missionStatus.name,
-                'tripulation': mission.tripulation,
+                'crew': mission.crew,
                 'payload': mission.payload,
-                'missionDuration': mission.missionDuration,
-                'missionCost': str(mission.missionCost), 
-                'missionInfoStatus': mission.missionInfoStatus
+                'duration': mission.duration,
+                'cost': str(mission.cost), 
+                'missionInfo': mission.missionInfo
             } for mission in missions]
         except Exception as e:
             print("Erro ao pesquisar missões por data:", e)
 
     """@classmethod
-    def update_mission(cls, mission_id, missionName=None, releaseDate=None, destination=None, missionStatus=None, tripulation=None, payload=None, missionDuration=None, missionCost=None, missionInfoStatus=None):
+    def update_mission(cls, mission_id, name=None, launchDate=None, destination=None, missionStatus=None, crew=None, payload=None, duration=None, cost=None, missionInfo=None):
         try:
             mission = db.session.query(cls).filter(cls.id == mission_id).first()
             if not mission:
                 return None
 
-            if missionName is not None:
-                mission.missionName = missionName
-            if releaseDate is not None:
-                mission.releaseDate = releaseDate
+            if name is not None:
+                mission.name = name
+            if launchDate is not None:
+                mission.launchDate = launchDate
             if destination is not None:
                 mission.destination = destination
             if missionStatus is not None:
                 mission.missionStatus = missionStatus
-            if tripulation is not None:
-                mission.tripulation = tripulation
+            if crew is not None:
+                mission.crew = crew
             if payload is not None:
                 mission.payload = payload
-            if missionDuration is not None:
-                mission.missionDuration = missionDuration
-            if missionCost is not None:
-                mission.missionCost = missionCost 
-            if missionInfoStatus is not None:
-                mission.missionInfoStatus = missionInfoStatus
+            if duration is not None:
+                mission.duration = duration
+            if cost is not None:
+                mission.cost = cost 
+            if missionInfo is not None:
+                mission.missionInfo = missionInfo
 
             db.session.commit()
             return mission
@@ -148,15 +169,15 @@ class Missions(db.Model):
 
             # Mapeia os atributos permitidos
             allowed_updates = {
-                'missionName': kwargs.get('missionName'),
-                'releaseDate': kwargs.get('releaseDate'),
+                'name': kwargs.get('name'),
+                'launchDate': kwargs.get('launchDate'),
                 'destination': kwargs.get('destination'),
                 'missionStatus': kwargs.get('missionStatus'),
-                'tripulation': kwargs.get('tripulation'),
+                'crew': kwargs.get('crew'),
                 'payload': kwargs.get('payload'),
-                'missionDuration': kwargs.get('missionDuration'),
-                'missionCost': kwargs.get('missionCost'),
-                'missionInfoStatus': kwargs.get('missionInfoStatus')
+                'duration': kwargs.get('duration'),
+                'cost': kwargs.get('cost'),
+                'missionInfo': kwargs.get('missionInfo')
             }
 
             # Atualiza os atributos que não são None

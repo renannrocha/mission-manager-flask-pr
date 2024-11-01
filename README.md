@@ -2,54 +2,156 @@
 
 Projeto da Disciplina - Sistema de Gerenciamento de Expedição Espacial
 
-## Testando os Endpoints REST
+Aqui está a documentação para cada endpoint com os campos necessários para os bodys:
 
-os principais endpoints da API:
+---
 
-- Listar todas as missões (GET):
+## **Endpoints da API**
 
-```
-GET /missions
-````
+### **1. `POST /missions/add`**
+Adiciona uma nova missão ao sistema.
 
-- Criar uma nova missão (POST):
+- **Corpo da Requisição**:
+  ```json
+  {
+    "name": "Nome da missão",
+    "launchDate": "YYYY-MM-DD",
+    "destination": "Destino da missão",
+    "missionStatus": "Status da missão (ACTIVE, COMPLETED, etc.)",
+    "crew": "Tripulação da missão",
+    "payload": "Carga útil da missão",
+    "duration": "Duração da missão",
+    "cost": 12345.67,
+    "missionInfo": "Informações adicionais sobre a missão"
+  }
+  ```
 
-```
-POST /missions
-```
+- **Campos obrigatórios**:
+  - `name` (string)
+  - `launchDate` (string, formato: "YYYY-MM-DD")
+  - `destination` (string)
+  - `missionStatus` (string, valor do enum `MissionStatus`)
+  - `cost` (float)
 
-### Payload (JSON):
+- **Resposta de Sucesso**:
+  ```json
+  {
+    "message": "Mission created successfully!",
+    "id": "ID da missão criada"
+  }
+  ```
 
-```json
-{
-  "name": "Apollo 11",
-  "launch_date": "1969-07-16",
-  "destination": "Moon",
-  "status": "Completed",
-  "crew": "Neil Armstrong, Buzz Aldrin",
-  "payload": "Lunar Module",
-  "duration": "8 days",
-  "cost": 1000000.0,
-  "mission_status": "Successful"
-}
-```
+### **2. `GET /missions/get`**
+Busca missões com base no intervalo de datas fornecido.
 
-- Visualizar uma missão específica (GET):
-```
-GET /missions/<int:mission_id>
-```
+- **Parâmetros de Query**:
+  ```json
+  {
+    "startDate": "YYYY-MM-DD",
+    "endDate": "YYYY-MM-DD"
+  }
+  ```
 
-- Atualizar uma missão específica (PUT):
-```
-PUT /missions/<int:mission_id>
-```
+- **Campos obrigatórios**:
+  - `startDate` (string, formato: "YYYY-MM-DD")
+  - `endDate` (string, formato: "YYYY-MM-DD")
 
-- Excluir uma missão (DELETE):
-```
-DELETE /missions/<int:mission_id>
-```
+- **Resposta de Sucesso**:
+  ```json
+  [
+    {
+      "id": "ID da missão",
+      "name": "Nome da missão",
+      "launchDate": "YYYY-MM-DD",
+      "destination": "Destino da missão",
+      "missionStatus": "Status da missão",
+      "crew": "Tripulação da missão",
+      "payload": "Carga útil da missão",
+      "duration": "Duração da missão",
+      "cost": 12345.67,
+      "missionInfo": "Informações adicionais sobre a missão"
+    }
+  ]
+  ```
 
-- Pesquisar missões por intervalo de datas (GET):
-```
-GET /missions/search?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
-```
+### **3. `GET /missions/getById`**
+Busca uma missão específica com base no ID.
+
+- **Parâmetros de Query**:
+  ```json
+  {
+    "id": "ID da missão"
+  }
+  ```
+
+- **Campo obrigatório**:
+  - `id` (int)
+
+- **Resposta de Sucesso**:
+  ```json
+  {
+    "id": "ID da missão",
+    "name": "Nome da missão",
+    "launchDate": "YYYY-MM-DD",
+    "destination": "Destino da missão",
+    "missionStatus": "Status da missão",
+    "crew": "Tripulação da missão",
+    "payload": "Carga útil da missão",
+    "duration": "Duração da missão",
+    "cost": 12345.67,
+    "missionInfo": "Informações adicionais sobre a missão"
+  }
+  ```
+
+### **4. `PUT /missions/update`**
+Atualiza os dados de uma missão específica.
+
+- **Corpo da Requisição**:
+  ```json
+  {
+    "id": "ID da missão a ser atualizada",
+    "name": "Nome da missão (opcional)",
+    "launchDate": "YYYY-MM-DD (opcional)",
+    "destination": "Destino da missão (opcional)",
+    "missionStatus": "Status da missão (opcional)",
+    "crew": "Tripulação da missão (opcional)",
+    "payload": "Carga útil da missão (opcional)",
+    "duration": "Duração da missão (opcional)",
+    "cost": 12345.67,
+    "missionInfo": "Informações adicionais sobre a missão (opcional)"
+  }
+  ```
+
+- **Campo obrigatório**:
+  - `id` (int)
+
+- **Resposta de Sucesso**:
+  ```json
+  {
+    "message": "Mission updated successfully!"
+  }
+  ```
+
+### **5. `DELETE /missions/delete`**
+Remove uma missão específica do sistema.
+
+- **Corpo da Requisição**:
+  ```json
+  {
+    "id": "ID da missão a ser deletada"
+  }
+  ```
+
+- **Campo obrigatório**:
+  - `id` (int)
+
+- **Resposta de Sucesso**:
+  ```json
+  {
+    "message": "Mission deleted successfully!"
+  }
+  ```
+
+---
+
+Essas documentações permitem que cada endpoint seja utilizado corretamente, especificando os campos obrigatórios e opcionais, bem como os formatos esperados e as respostas de sucesso.
