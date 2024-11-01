@@ -1,0 +1,14 @@
+{
+    "configurations": [
+      {
+        "name": "Python: main.py",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/main.py",
+        "env": {
+          "SQLALCHEMY_DATABASE_URI": "sqlite:///crud.db",
+          "SQLALCHEMY_TRACK_MODIFICATIONS": "false"
+        }
+      }
+    ]
+  }

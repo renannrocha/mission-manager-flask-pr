@@ -1,5 +1,5 @@
-from main import db
-from models.enums.missionStatus import MissionStatus
+from src.database import db
+from src.models.enum.missionStatus import MissionStatus
 from decimal import Decimal
 
 class Missions(db.Model):

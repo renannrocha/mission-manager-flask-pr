@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask import jsonify
 from src.models.entities.missions import Missions  
-from models.enum.missionStatus import MissionStatus
+from src.models.enum.missionStatus import MissionStatus
 from datetime import datetime
 
 # Definindo argumentos para criar uma missão
