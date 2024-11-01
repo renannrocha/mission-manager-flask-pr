@@ -9,7 +9,6 @@ from src.models.entities.missions import Missions
 from src.rest.controller.missionsController import MissionInsert, MissionList, MissionById, MissionDelete, MissionUpdate 
 
 app = Flask(__name__)
-db.init_app(app)
 CORS(app) 
 
 # Verificação do valor da variável de ambiente
@@ -19,6 +18,7 @@ print("Database URI:", database_uri)  # Adicione esta linha para depuração
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///fallback_database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =  os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS', 'false').lower() == 'true' 
 
+db.init_app(app)
 api = Api(app)
 
 with app.app_context():
