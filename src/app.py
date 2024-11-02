@@ -8,7 +8,6 @@ from src.models.entities.missions import Missions
 from src.rest.controller.missionsController import (
     MissionInsert,
     MissionList,
-    MissionById,
     MissionDelete,
     MissionUpdate,
 )
@@ -36,6 +35,5 @@ api = Api(app)
 # Adiciona os recursos da API
 api.add_resource(MissionInsert, "/missions/add")
 api.add_resource(MissionList, "/missions/get")
-api.add_resource(MissionById, "/missions/getById/<int:mission_id>")
 api.add_resource(MissionUpdate, "/missions/update/<int:mission_id>")
 api.add_resource(MissionDelete, "/missions/delete/<int:mission_id>")

@@ -1,6 +1,5 @@
 from src.database import db
 from decimal import Decimal
-from datetime import datetime
 
 class Missions(db.Model):
 
@@ -54,48 +53,7 @@ class Missions(db.Model):
             print("Erro ao criar missão:", e)
             db.session.rollback()
             return {"status": 500, "msg": "Erro interno ao criar missão"} 
-        
-    @classmethod
-    def get_missions(cls):
-        try:
-            missions = db.session.query(cls).order_by(cls.launchDate.desc()).all()
-            return [{
-                'id': mission.id,
-                'name': mission.name,
-                'launchDate': mission.launchDate,
-                'destination': mission.destination,
-                'status': mission.status, 
-                'crew': mission.crew,
-                'payload': mission.payload,
-                'duration': mission.duration,
-                'cost': str(mission.cost), 
-                'missionInfo': mission.missionInfo
-            } for mission in missions]
-        except Exception as e:
-            print("Erro ao obter missões:", e)
-            return {"status": 500, "msg": "Erro interno ao obter missões"}
 
-    @classmethod
-    def get_mission(cls, mission_id):
-        try:
-            mission = db.session.query(cls).filter(cls.id == mission_id).first()
-            if mission:
-                return {
-                    'id': mission.id,
-                    'name': mission.name,
-                    'launchDate': mission.launchDate,
-                    'destination': mission.destination,
-                    'status': mission.status, 
-                    'crew': mission.crew,
-                    'payload': mission.payload,
-                    'duration': mission.duration,
-                    'cost': str(mission.cost),  
-                    'missionInfo': mission.missionInfo
-                }
-            return None
-        except Exception as e:
-            print("Erro ao obter missão:", e)
-            return {"status": 500, "msg": "Erro interno ao obter missão"}
 
     @classmethod
     def search_missions_by_date(cls, start_date, end_date):

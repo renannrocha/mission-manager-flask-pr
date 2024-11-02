@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask import jsonify
 from src.models.entities.missions import Missions
-from datetime import datetime
+from datetime import datetime, date
 
 argumentos = reqparse.RequestParser()
 argumentos.add_argument('name', type=str, required=True)
@@ -15,7 +15,6 @@ argumentos.add_argument('cost', type=float, required=True)
 argumentos.add_argument('missionInfo', type=str)
 
 argumentos_update = reqparse.RequestParser()
-argumentos_update.add_argument('id', type=int, required=True)
 argumentos_update.add_argument('name', type=str)
 argumentos_update.add_argument('launchDate', type=str) 
 argumentos_update.add_argument('destination', type=str)
@@ -26,9 +25,6 @@ argumentos_update.add_argument('duration', type=str)
 argumentos_update.add_argument('cost', type=float)
 argumentos_update.add_argument('missionInfo', type=str)
 
-argumentos_delete = reqparse.RequestParser()
-argumentos_delete.add_argument('id', type=int, required=True)
-
 argumentos_search = reqparse.RequestParser()
 argumentos_search.add_argument('startDate', type=str, required=True) 
 argumentos_search.add_argument('endDate', type=str, required=True)   
@@ -37,15 +33,27 @@ class MissionList(Resource):
     def get(self):
         try:
             args = argumentos_search.parse_args()
-            start_date = datetime.strptime(args['startDate'], "%Y-%m-%d").date()
-            end_date = datetime.strptime(args['endDate'], "%Y-%m-%d").date()
+            
+            try:
+                start_date = datetime.strptime(args['startDate'], "%Y-%m-%d").date()
+                end_date = datetime.strptime(args['endDate'], "%Y-%m-%d").date()
+            except ValueError:
+                return {'status': 400, 'msg': "Formato de data inválido. Use 'YYYY-MM-DD'."}, 400
+            
             missions = Missions.search_missions_by_date(start_date, end_date)
 
-            # Ordenar missões por data de lançamento
+            if not missions:
+                return {'status': 404, 'msg': "Nenhuma missão encontrada para as datas fornecidas."}, 404
+
             missions.sort(key=lambda x: x['launchDate'], reverse=True)
+
+            for mission in missions:
+                mission['launchDate'] = mission['launchDate'].strftime("%Y-%m-%d")
+
             return missions, 200
+        
         except Exception as e:
-            return {'status': 500, 'msg': str(e)}, 500
+            return {'status': 500, 'msg': f"Erro interno: {str(e)}"}, 500
 
 
 class MissionInsert(Resource):
@@ -81,38 +89,24 @@ class MissionInsert(Resource):
             return {'status': 500, 'msg': str(e)}, 500
 
 
-class MissionById(Resource):
-    def get(self):
-        try:
-            args = reqparse.RequestParser()
-            args.add_argument('id', type=int, required=True)
-            datas = args.parse_args()
-            mission = Missions.get_mission(datas['id'])
-            if mission:
-                return mission, 200
-            return {'message': 'Mission not found'}, 404
-        except Exception as e:
-            return {'status': 500, 'msg': str(e)}, 500
-
-
 class MissionUpdate(Resource):
-    def put(self):
+    def put(self, mission_id):
         try:
-            datas = argumentos_update.parse_args()
-            mission_status = datas['status'] if datas.get('status') else None
-            
-            # Verificação similar para `launchDate` em `update`
+            datas = argumentos_update.parse_args()  # Obtém apenas os campos necessários
+            mission_status = datas.get('status')  # Obtém o status diretamente
+
+            # Processa a data de lançamento, se fornecida
             if datas.get('launchDate'):
                 launch_date = datetime.strptime(datas['launchDate'], '%Y-%m-%d').date()
             else:
                 launch_date = None
 
             updated_mission = Missions.update_mission(
-                mission_id=datas['id'],
+                mission_id=mission_id,  # Usa o ID da rota
                 name=datas.get('name'),
                 launchDate=launch_date,
                 destination=datas.get('destination'),
-                status=datas.get('status'), 
+                status=mission_status,  # Atualiza o status se fornecido
                 crew=datas.get('crew'),
                 payload=datas.get('payload'),
                 duration=datas.get('duration'),
@@ -128,10 +122,9 @@ class MissionUpdate(Resource):
 
 
 class MissionDelete(Resource):
-    def delete(self):
+    def delete(self, mission_id):
         try:
-            datas = argumentos_delete.parse_args()
-            Missions.delete_mission(datas['id'])
+            Missions.delete_mission(mission_id)
             return {'message': 'Mission deleted successfully!'}, 200
         except Exception as e:
             return {'status': 500, 'msg': str(e)}, 500
