@@ -30,7 +30,6 @@ class Missions(db.Model):
     @classmethod
     def create_mission(cls, name, launchDate, destination, status, crew, payload, duration, cost, missionInfo):
         try:
-            # Criação da nova missão
             new_mission = cls(
                 name=name,
                 launchDate=launchDate,
@@ -82,7 +81,6 @@ class Missions(db.Model):
             if not mission:
                 return None
 
-            # Valida e atualiza status se fornecido
             if 'status' in kwargs and not isinstance(kwargs['status'], str):
                 raise ValueError(f"Valor inválido para status: {kwargs['status']}")
 

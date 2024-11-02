@@ -92,21 +92,20 @@ class MissionInsert(Resource):
 class MissionUpdate(Resource):
     def put(self, mission_id):
         try:
-            datas = argumentos_update.parse_args()  # Obtém apenas os campos necessários
-            mission_status = datas.get('status')  # Obtém o status diretamente
+            datas = argumentos_update.parse_args() 
+            mission_status = datas.get('status')  
 
-            # Processa a data de lançamento, se fornecida
             if datas.get('launchDate'):
                 launch_date = datetime.strptime(datas['launchDate'], '%Y-%m-%d').date()
             else:
                 launch_date = None
 
             updated_mission = Missions.update_mission(
-                mission_id=mission_id,  # Usa o ID da rota
+                mission_id=mission_id, 
                 name=datas.get('name'),
                 launchDate=launch_date,
                 destination=datas.get('destination'),
-                status=mission_status,  # Atualiza o status se fornecido
+                status=mission_status,
                 crew=datas.get('crew'),
                 payload=datas.get('payload'),
                 duration=datas.get('duration'),

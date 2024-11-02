@@ -2,9 +2,27 @@
 
 Projeto da Disciplina - Sistema de Gerenciamento de Expedição Espacial
 
-Aqui está a documentação para cada endpoint com os campos necessários para os bodys:
+## **Comandos para execução da API**
 
----
+1. **realizar a instalação das dependencias**
+```
+python -m pip install -r .\resources\requirements.txt
+```
+
+2. **criar a pasta env**
+```
+python -m venv env
+```
+
+3. **ativar os recuros**
+```
+.\env\Scripts\activate
+```
+
+4. **executar a aplicação**
+```
+python main.py
+```
 
 ## **Endpoints da API**
 
@@ -14,16 +32,16 @@ Adiciona uma nova missão ao sistema.
 - **Corpo da Requisição**:
   ```json
   {
-    "name": "Nome da missão",
-    "launchDate": "YYYY-MM-DD",
-    "destination": "Destino da missão",
-    "missionStatus": "Status da missão (ACTIVE, COMPLETED, etc.)",
-    "crew": "Tripulação da missão",
-    "payload": "Carga útil da missão",
-    "duration": "Duração da missão",
-    "cost": 12345.67,
-    "missionInfo": "Informações adicionais sobre a missão"
-  }
+    "name": "Apollo 11",
+    "launchDate": "1969-07-16",
+    "destination": "Moon",
+    "status": "completed",
+    "crew": "Neil Armstrong, Buzz Aldrin",
+    "payload": "Lunar Module",
+    "duration": "8 days",
+    "cost": 1000000.0,
+    "missionInfo": "First manned mission to the moon"
+  } 
   ```
 
 - **Campos obrigatórios**:
@@ -37,7 +55,7 @@ Adiciona uma nova missão ao sistema.
   ```json
   {
     "message": "Mission created successfully!",
-    "id": "ID da missão criada"
+    "id": 11
   }
   ```
 
@@ -47,8 +65,8 @@ Busca missões com base no intervalo de datas fornecido.
 - **Parâmetros de Query**:
   ```json
   {
-    "startDate": "YYYY-MM-DD",
-    "endDate": "YYYY-MM-DD"
+    "startDate": "1969-07-16",
+    "endDate": "1969-07-16"
   }
   ```
 
@@ -60,60 +78,33 @@ Busca missões com base no intervalo de datas fornecido.
   ```json
   [
     {
-      "id": "ID da missão",
-      "name": "Nome da missão",
-      "launchDate": "YYYY-MM-DD",
-      "destination": "Destino da missão",
-      "missionStatus": "Status da missão",
-      "crew": "Tripulação da missão",
-      "payload": "Carga útil da missão",
-      "duration": "Duração da missão",
-      "cost": 12345.67,
-      "missionInfo": "Informações adicionais sobre a missão"
+      "id": 11,
+      "name": "Apollo 11",
+      "launchDate": "1969-07-16",
+      "destination": "Moon",
+      "status": "completed",
+      "crew": "Neil Armstrong, Buzz Aldrin",
+      "payload": "Lunar Module",
+      "duration": "8 days",
+      "cost": "1000000.00",
+      "missionInfo": "First manned mission to the moon"
     }
   ]
   ```
 
-### **3. `GET /missions/getById`**
-Busca uma missão específica com base no ID.
-
-- **Parâmetros de Query**:
-  ```json
-  {
-    "id": "ID da missão"
-  }
-  ```
-
-- **Campo obrigatório**:
-  - `id` (int)
-
-- **Resposta de Sucesso**:
-  ```json
-  {
-    "id": "ID da missão",
-    "name": "Nome da missão",
-    "launchDate": "YYYY-MM-DD",
-    "destination": "Destino da missão",
-    "missionStatus": "Status da missão",
-    "crew": "Tripulação da missão",
-    "payload": "Carga útil da missão",
-    "duration": "Duração da missão",
-    "cost": 12345.67,
-    "missionInfo": "Informações adicionais sobre a missão"
-  }
-  ```
-
-### **4. `PUT /missions/update`**
+### **3. `PUT /missions/update/<int:mission_id>`**
 Atualiza os dados de uma missão específica.
+
+- **Parametros obrigatório**:
+  - `id` (int)
 
 - **Corpo da Requisição**:
   ```json
   {
-    "id": "ID da missão a ser atualizada",
     "name": "Nome da missão (opcional)",
     "launchDate": "YYYY-MM-DD (opcional)",
     "destination": "Destino da missão (opcional)",
-    "missionStatus": "Status da missão (opcional)",
+    "status": "Status da missão (opcional)",
     "crew": "Tripulação da missão (opcional)",
     "payload": "Carga útil da missão (opcional)",
     "duration": "Duração da missão (opcional)",
@@ -122,9 +113,6 @@ Atualiza os dados de uma missão específica.
   }
   ```
 
-- **Campo obrigatório**:
-  - `id` (int)
-
 - **Resposta de Sucesso**:
   ```json
   {
@@ -132,17 +120,10 @@ Atualiza os dados de uma missão específica.
   }
   ```
 
-### **5. `DELETE /missions/delete`**
+### **5. `DELETE /missions/delete/<int:mission_id>`**
 Remove uma missão específica do sistema.
 
-- **Corpo da Requisição**:
-  ```json
-  {
-    "id": "ID da missão a ser deletada"
-  }
-  ```
-
-- **Campo obrigatório**:
+- **Parametros obrigatório**:
   - `id` (int)
 
 - **Resposta de Sucesso**:
@@ -152,6 +133,3 @@ Remove uma missão específica do sistema.
   }
   ```
 
----
-
-Essas documentações permitem que cada endpoint seja utilizado corretamente, especificando os campos obrigatórios e opcionais, bem como os formatos esperados e as respostas de sucesso.

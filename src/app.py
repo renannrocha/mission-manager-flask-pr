@@ -15,9 +15,9 @@ from src.rest.controller.missionsController import (
 app = Flask(__name__)
 CORS(app)
 
-# Verificação do valor da variável de ambiente
+
 database_uri = os.getenv('SQLALCHEMY_DATABASE_URI')
-print("Database URI:", database_uri)  # Adicione esta linha para depuração
+print("Database URI:", database_uri) 
 
 # Configurações do banco de dados
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri or 'sqlite:///fallback_database.db'
@@ -25,14 +25,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('SQLALCHEMY_TRACK_MODIF
 
 db.init_app(app)
 
-# Inicializa o contexto da aplicação para criar as tabelas no banco de dados
 with app.app_context():
     db.create_all()
 
-# Instância da API RESTful
 api = Api(app)
-
-# Adiciona os recursos da API
 api.add_resource(MissionInsert, "/missions/add")
 api.add_resource(MissionList, "/missions/get")
 api.add_resource(MissionUpdate, "/missions/update/<int:mission_id>")
