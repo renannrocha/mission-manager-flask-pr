@@ -2,6 +2,9 @@
 
 Projeto da Disciplina - Sistema de Gerenciamento de Expedição Espacial
 
+> [!IMPORTANT]
+> O relatório RAD do projeto esta disponível na pasta: /docs/RelatorioRAD.pdf
+
 ## **Comandos para execução da API**
 
 1. **realizar a instalação das dependencias**
